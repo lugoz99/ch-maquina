@@ -320,18 +320,26 @@ def select_file1():
     nueva = nueva.strip()
     nueva = nueva.split("\n")
     rglc = registroLoc(nueva)
-    crearBloquetabla(filename, rglc)
+    # asignarPosiciones()
     areaDetrabajo()
+    crearBloquetabla(filename, rglc)
     # contador = listaPrograma.size() + 4
     file.close()
 
 
 def areaDetrabajo():
     global contador
+    var = variables(nueva)
     for i, pr in enumerate(nueva, contador):
         e = " ".join(pr.split())
         listaPrograma.insert(END, f"{i:04d} " f"{e}")
-    contador += listaPrograma.size() + variables(nueva)
+
+    print("informaicon lista", listaPrograma.size())
+    print("informaicon contador", contador)
+    print("ultima instruccion ", encontrarRetorno())
+    contador += encontrarRetorno() + var
+    print("contador final = ", contador)
+    asignarPosiciones(contador)
 
 
 def variables(p):
@@ -352,7 +360,6 @@ def crearBloquetabla(filename, regLc, regBase=""):
     p = os.path.basename(filename)
     v = str(p)
     # vl = ejecucion.tablaBloque([v], [101], [102], [limite], [24])
-    # print("numero de programa", numeroPrograma)
     numero = nroProgamasCargados(numeroPrograma)
     # print("Numero", numero)
     tablaBloque.insert('', 'end', iid=None,
@@ -374,5 +381,68 @@ def totalInstrucciones(archivo):
     return num_lines
 
 
-print(tablaBloque.size())
+def areaDeVariables(variables):
+    # print(contador)
+    numero = nroProgamasCargados(numeroPrograma)
+    # print(contador, "asignacion de numero ", numeroPrograma)
+    print("numero de programa", numero)
+
+
+def encontrarVariables():
+    v = []
+    for index, i in enumerate(nueva):
+        global programa
+        # * e quita espacios
+        e = " ".join(i.split())
+        programa = e.split(" ")
+        if programa[0].lower() == 'nueva':
+            v.append(programa[1])
+    return v
+
+
+def encontrarEtiquetas():
+    etiquetas = []
+    for index, i in enumerate(nueva):
+        global programa
+        e = " ".join(i.split())
+        programa = e.split(" ")
+        if programa[0].lower() == 'etiqueta':
+            etiquetas.append(programa[1])
+    return etiquetas
+
+
+def encontrarRetorno():
+    for index, i in enumerate(nueva):
+        global programa
+        # * e quita espacios
+        e = " ".join(i.split())
+        programa = e.split(" ")
+        if programa[0].lower() == 'retorne':
+            return index + 1
+
+
+# ? COMO OBTENGO LAS POSICIONES DE LAS VARIABLES
+def asignarPosiciones(c):
+    lista01 = []
+    final = c  # 34 # 57
+    inicial = c - variables(nueva)  # 34 - 4 = 30 57 - 4 =
+    print("inicial", inicial)
+    print("final ", contador)
+    while inicial < final:
+        lista01.append(inicial)
+        inicial += 1
+
+    print(lista01)
+    for d in zip(lista01, encontrarVariables()):
+        listaVariables.insert(END, f" {d[0]}   " f"{d[1]}" + f"{numeroPrograma:04d}")
+
+
+def asignarAreaVariables(d):
+    global numeroPrograma
+    for i in range(len(d)):
+        print(i)
+        listaVariables.insert(END, f"{d[0]}"   f"{d[1]}    " + f"{numeroPrograma:04d}")
+        numeroPrograma += 1
+
+
 root.mainloop()
