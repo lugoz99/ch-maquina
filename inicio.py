@@ -143,6 +143,8 @@ listaVariables.pack(side=TOP, fill=X, expand=False)
 frameLb1 = LabelFrame(frameAreaVT, text="Etiquetas")
 listaEtiquetas = Listbox(frameLb1, background="#ff8585", width=30, height=9, activestyle='none')
 listaEtiquetas.pack(side=TOP, fill=X, expand=False)
+listaVariables.insert(0, " POS    VARIABLES")
+listaEtiquetas.insert(0, "POS   ETIQUETAS")
 
 frameLb.grid(row=0, column=0, sticky="S")
 frameLb1.grid(row=1, column=0)
@@ -250,52 +252,23 @@ def tamListaPrograma():
     return listaPrograma.size() > 0
 
 
-# root.resizable(width=False, height=False)
-def select_file():
-    global nueva
-    global contador
-    filetypes = (
-        ('text files', '*.ch'),
-    )
-
-    filename = fd.askopenfilename(
-        title='Open a file',
-        initialdir='/ch-maquina',
-        filetypes=filetypes,
-    )
-
-    # nueva = nueva.split("\n")
-    nueva = ctrl.leerPrograma(filename)
-    index = None
-    c = -1
-    for i, p in enumerate(nueva, 11):
-        index = f"{i:04d}"
-        listaPrograma.insert(END, f"{index}  {p}")
-        # ? validacion pertinentes para cargar a memoria principal
-
-    ctrl.operacion(nueva, index)
-    p = os.path.basename(filename)
-    v = str(p)
-    limite = registroLoc(nueva) + 1
-    print("cantidad : ", ctrl.programasCantidad())
-    vl = ejecucion.tablaBloque([v], [101], [102], [limite], [24])
-    tablaBloque.insert('', 'end', iid=None,
-                       values=(f"{c:04d}", vl[1], "INS", "RB", vl[4], "S"))
-
-
 def nroProgamasCargados(nro):
     if nro < 10:
-        return ('000' + str(nro))
+        return '000' + str(nro)
     elif nro > 9 and nro < 100:
         return '00' + str(nro)
-    elif (nro > 99 and nro < 100):
+    elif nro > 99 and nro < 100:
         return '0' + str(nro)
+
+
+filename = ""
 
 
 def select_file1():
     global nueva
     global numeroprograma
     global contador
+    global filename
     filetypes = (
         ('text files', '*.ch'),
         ("all files", "*.*")
@@ -307,7 +280,6 @@ def select_file1():
         filetypes=filetypes,
     )
     numeroprograma += 1
-    print("aqui se llama a numero de programama si  o no", numeroPrograma)
     # crearBloquetabla(filename)
     file = open(filename, "r")
     lineas = file.readlines()
@@ -319,10 +291,9 @@ def select_file1():
 
     nueva = nueva.strip()
     nueva = nueva.split("\n")
-    rglc = registroLoc(nueva)
     # asignarPosiciones()
     areaDetrabajo()
-    crearBloquetabla(filename, rglc)
+    # crearBloquetabla(filename, "rb")
     # contador = listaPrograma.size() + 4
     file.close()
 
@@ -334,12 +305,13 @@ def areaDetrabajo():
         e = " ".join(pr.split())
         listaPrograma.insert(END, f"{i:04d} " f"{e}")
 
-    print("informaicon lista", listaPrograma.size())
-    print("informaicon contador", contador)
-    print("ultima instruccion ", encontrarRetorno())
+    registoBase = contador
+    crearTablaEtiquetas(contador, encontrarEtiquetas(contador), asignarPosicionEtiquetas(contador))
     contador += encontrarRetorno() + var
-    print("contador final = ", contador)
     asignarPosiciones(contador)
+    registroLc = contador - var - 1
+    registroLimiteP = registroLc + var
+    crearBloquetabla(filename, registroLc, registoBase, registroLimiteP)
 
 
 def variables(p):
@@ -354,38 +326,22 @@ def variables(p):
     return cantidad
 
 
-def crearBloquetabla(filename, regLc, regBase=""):
-    global archivos, numeroPrograma
-    total = totalInstrucciones(filename)
+def crearBloquetabla(filename, regLc, regBase, regLimteP):
+    global numeroPrograma
+    totalIns = totalInstrucciones(filename) + variables(nueva) - 1
+    registroBs = regBase
     p = os.path.basename(filename)
     v = str(p)
-    # vl = ejecucion.tablaBloque([v], [101], [102], [limite], [24])
     numero = nroProgamasCargados(numeroPrograma)
-    # print("Numero", numero)
     tablaBloque.insert('', 'end', iid=None,
-                       values=(numero, v, total, "RB", regLc, "RLP"))
+                       values=(numero, v, totalIns, registroBs, regLc, regLimteP))
 
     numeroPrograma += 1
 
 
-def registroLoc(n):
-    for index, i in enumerate(n, textFinal.get() + 1):
-        p = i.split(" ")
-        if p[0] == 'retorne':
-            return index
-
-
 def totalInstrucciones(archivo):
     # ? total de instruccione = + las variables que se deben crear
-    num_lines = sum(1 for line in open(archivo))
-    return num_lines
-
-
-def areaDeVariables(variables):
-    # print(contador)
-    numero = nroProgamasCargados(numeroPrograma)
-    # print(contador, "asignacion de numero ", numeroPrograma)
-    print("numero de programa", numero)
+    return sum(1 for line in open(archivo))
 
 
 def encontrarVariables():
@@ -396,19 +352,39 @@ def encontrarVariables():
         e = " ".join(i.split())
         programa = e.split(" ")
         if programa[0].lower() == 'nueva':
-            v.append(programa[1])
+            v.append((programa[1]))
     return v
 
 
-def encontrarEtiquetas():
+def encontrarEtiquetas(c):
     etiquetas = []
-    for index, i in enumerate(nueva):
+    for index, i in enumerate(nueva, c):
         global programa
         e = " ".join(i.split())
         programa = e.split(" ")
         if programa[0].lower() == 'etiqueta':
             etiquetas.append(programa[1])
+
     return etiquetas
+
+
+def asignarPosicionEtiquetas(c):
+    etiquetas = []
+    for index, i in enumerate(nueva, c):
+        global programa
+        e = " ".join(i.split())
+        programa = e.split(" ")
+        if programa[0].lower() == 'etiqueta':
+            etiquetas.append(programa[2])
+
+    return etiquetas
+
+
+def crearTablaEtiquetas(c, etiquetas, nums):
+    global numeroPrograma
+    for i in range(len(etiquetas)):
+        index = int(nums[i])
+        listaEtiquetas.insert(END, f"{c + index - 1:04d}  "  f"{numeroPrograma:04d}" + f"{etiquetas[i]}")
 
 
 def encontrarRetorno():
@@ -422,27 +398,17 @@ def encontrarRetorno():
 
 
 # ? COMO OBTENGO LAS POSICIONES DE LAS VARIABLES
+
 def asignarPosiciones(c):
     lista01 = []
     final = c  # 34 # 57
     inicial = c - variables(nueva)  # 34 - 4 = 30 57 - 4 =
-    print("inicial", inicial)
-    print("final ", contador)
     while inicial < final:
         lista01.append(inicial)
         inicial += 1
 
-    print(lista01)
     for d in zip(lista01, encontrarVariables()):
-        listaVariables.insert(END, f" {d[0]}   " f"{d[1]}" + f"{numeroPrograma:04d}")
-
-
-def asignarAreaVariables(d):
-    global numeroPrograma
-    for i in range(len(d)):
-        print(i)
-        listaVariables.insert(END, f"{d[0]}"   f"{d[1]}    " + f"{numeroPrograma:04d}")
-        numeroPrograma += 1
+        listaVariables.insert(END, f" {d[0]:04d}   "   f"{numeroPrograma:04d}" + f"{d[1]}")
 
 
 root.mainloop()
