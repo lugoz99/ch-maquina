@@ -23,7 +23,7 @@ nueva = ""
 
 root = Tk()
 memoriaInicial = IntVar()
-contador = 0
+contador = 11
 numeroPrograma = 0
 root.option_add("*Font", 'FiraCode 12 bold')
 wd = root.winfo_screenwidth()
@@ -253,6 +253,7 @@ def tamListaPrograma():
 # root.resizable(width=False, height=False)
 def select_file():
     global nueva
+    global contador
     filetypes = (
         ('text files', '*.ch'),
     )
@@ -294,6 +295,7 @@ def nroProgamasCargados(nro):
 def select_file1():
     global nueva
     global numeroprograma
+    global contador
     filetypes = (
         ('text files', '*.ch'),
         ("all files", "*.*")
@@ -319,15 +321,29 @@ def select_file1():
     nueva = nueva.split("\n")
     rglc = registroLoc(nueva)
     crearBloquetabla(filename, rglc)
+    areaDetrabajo()
+    # contador = listaPrograma.size() + 4
     file.close()
-    kernel = textFinal.get() + 1
-    programas = 11
-    for i, pr in enumerate(nueva, programas + listaPrograma.size()):
+
+
+def areaDetrabajo():
+    global contador
+    for i, pr in enumerate(nueva, contador):
         e = " ".join(pr.split())
-        index = f"{i:04d}"
-        listaPrograma.insert(END, f"{index}  {e}")
-        programas = programas + 1
-    # print("ejecucion : ", ejecucion.formatoIdentificacion(getContador()))
+        listaPrograma.insert(END, f"{i:04d} " f"{e}")
+    contador += listaPrograma.size() + variables(nueva)
+
+
+def variables(p):
+    global programa
+    cantidad = 0
+    for index, i in enumerate(p):
+        # * e quita espacios
+        e = " ".join(i.split())
+        programa = e.split(" ")
+        if programa[0].lower() == 'nueva':
+            cantidad += 1
+    return cantidad
 
 
 def crearBloquetabla(filename, regLc, regBase=""):
@@ -336,9 +352,9 @@ def crearBloquetabla(filename, regLc, regBase=""):
     p = os.path.basename(filename)
     v = str(p)
     # vl = ejecucion.tablaBloque([v], [101], [102], [limite], [24])
-    print("numero de programa", numeroPrograma)
+    # print("numero de programa", numeroPrograma)
     numero = nroProgamasCargados(numeroPrograma)
-    print("Numero", numero)
+    # print("Numero", numero)
     tablaBloque.insert('', 'end', iid=None,
                        values=(numero, v, total, "RB", regLc, "RLP"))
 

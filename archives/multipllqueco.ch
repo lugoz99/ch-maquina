@@ -1,5 +1,5 @@
 nueva unidad I 1
- nueva m I 5 
+nueva m I 5
 nueva  n I 9
 nueva  respuesta I 0
 nueva resultado C Resultado=
