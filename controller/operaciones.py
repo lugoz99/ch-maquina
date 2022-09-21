@@ -71,12 +71,14 @@ def crearVaribale(lista, linea):
         return estructurVariable
 
 
-def buscarVariable(variable, linea, listPrograma):
+def buscarVariable(variable, listPrograma):
     return variable == listPrograma["nombre"]
 
-def sume():
-    pass
+
+def obtenerVariables():
+    return estructurVariable
 
 
-def almacener():
-    pass
+def buscarVariableDato(variable, listaPrograma):
+    if variable == listaPrograma[variable]:
+        return estructurVariable["tipoDato"]

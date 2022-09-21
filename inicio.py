@@ -68,6 +68,9 @@ Label(food, image=imagenContainer).grid(row=0, column=0)
 food.grid(row=0, column=0, sticky="w")
 frameProceador.grid_propagate(False)
 # *---------------LABEL MEMORIA-KERNEL---------------
+textMemeroria = IntVar()
+textMemeroria.set(100)
+
 labelMemroia = LabelFrame(frameProceador, width=250, height=50, relief=SUNKEN)
 labelMemroia.grid(row=0, column=1, sticky="ns")
 labelMemroia.grid_propagate(False)
@@ -77,8 +80,7 @@ labeK = Label(labelMemroia, text="Kernel", width=10)
 labeK.grid(row=1, column=0, pady=10)
 frameProceador.grid_propagate(False)
 # * Memoria
-
-spM = Spinbox(labelMemroia, from_=0, to=50, width=10, wrap=True)
+spM = Spinbox(labelMemroia, from_=0, to=999, width=10, wrap=True,textvariable=textMemeroria)
 spM.grid(row=0, column=1, padx=4)
 # * Kernel
 textFinal = IntVar()  # * SE USA PARA VALIDAR QUE NO SE CAMBIE EL KERNE CUANDO SE CARGE PROGRAMA
@@ -108,8 +110,8 @@ etiqueta2 = Label(frameAcumulador, text="PC")
 etiqueta2.place(x=5, y=65)
 pc = ttk.Entry(frameAcumulador, justify=CENTER, width=22, state="readonly")
 pc.place(x=40, y=65, anchor=NW)
-
-programa = ttk.Entry(frameAcumulador, justify=CENTER, width=26, state="readonly")
+textPrograma = StringVar()
+programa = ttk.Entry(frameAcumulador, justify=CENTER, width=26, state="readonly",textvariable=textPrograma)
 style = ttk.Style()
 style.configure("Custom.TLabel", foreground="white",
                 background="#3baea0",
@@ -143,8 +145,8 @@ listaVariables.pack(side=TOP, fill=X, expand=False)
 frameLb1 = LabelFrame(frameAreaVT, text="Etiquetas")
 listaEtiquetas = Listbox(frameLb1, background="#ff8585", width=30, height=9, activestyle='none')
 listaEtiquetas.pack(side=TOP, fill=X, expand=False)
-listaVariables.insert(0, " POS    VARIABLES")
-listaEtiquetas.insert(0, "POS   ETIQUETAS")
+listaVariables.insert(0, " Pos    Variables")
+listaEtiquetas.insert(0, "Pos   Etiquetas")
 
 frameLb.grid(row=0, column=0, sticky="S")
 frameLb1.grid(row=1, column=0)
@@ -283,7 +285,9 @@ def select_file1():
     # crearBloquetabla(filename)
     file = open(filename, "r")
     lineas = file.readlines()
-
+    # * Establesco el nombre del programa
+    # ? Que debe pasar cuando se abren varios programas
+    textPrograma.set(os.path.basename(filename))
     nueva = ""
     for ln in range(len(lineas)):
         if not lineas[ln].startswith("//"):
@@ -291,10 +295,7 @@ def select_file1():
 
     nueva = nueva.strip()
     nueva = nueva.split("\n")
-    # asignarPosiciones()
     areaDetrabajo()
-    # crearBloquetabla(filename, "rb")
-    # contador = listaPrograma.size() + 4
     file.close()
 
 

@@ -12,6 +12,7 @@ kernel = 10 * z + 9
 tiposAceptados = ["I", "C", "R", "L"]
 
 contenido2 = []
+
 cuenta = -1
 import controller.operaciones as Ctrloperacion
 
@@ -81,7 +82,7 @@ def programasCantidad():
     return cantidad
 
 
-def operacion(lista, index):
+def checkeoSintaxis(lista, index):
     global cuenta
     final = lista
     print(final)
@@ -91,43 +92,125 @@ def operacion(lista, index):
         e = " ".join(i.split())
         programa = e.split(" ")
         if programa[0] == 'nueva':
-            variable = Ctrloperacion.crearVaribale(programa, index)
-            if len(programa) < 3 or len(programa) > 4:
+            if tamParametros(programa[0], index):
+                print("EROR EN VARIABLES")
+                listErrores.append([{"error": "001", "msg": "Error de declarion variable"}])
                 contadorDeerrores += 1
-                print("errores: ", listErrores.append([{"error": "001", "msg": "Error de declarion variable"}]))
             else:
-                print("tam ", len(programa), " variable devuelta : ", variable)
+                variables = Ctrloperacion.crearVaribale(programa, index)
         elif programa[0] == 'cargue':
-            print("segunda")
+            if Ctrloperacion.buscarVariable(programa[1], index) is False:
+                listErrores.append([{"error": "002", "msg": "la variable indicada no existe", "lineal": index}])
+            if tamParametros(programa, index):
+                if len(programa) <= 2 or len(programa) > 3:
+                    listErrores.append({"error": "003", "msg": "parametros insuficientes o excedidos"})
         elif programa[0] == 'lea':
-            print("tercera")
+            if Ctrloperacion.buscarVariable(programa[1], index) is False:
+                listErrores.append([{"error": "002", "msg": "la variable indicada no existe", "lineal": index}])
+            if tamParametros(programa, index):
+                if len(programa) <= 2 or len(programa) >= 3:
+                    listErrores.append({"error": "004", "msg": "parametros insuficientes o excedidos"})
         elif programa[0] == 'almacene':
-            print("cuarta")
+            if Ctrloperacion.buscarVariable(programa[1], index) is False:
+                listErrores.append([{"error": "002", "msg": "la variable indicada no existe", "lineal": index}])
+            if tamParametros(programa, index):
+                if len(programa) <= 2 or len(programa) >= 3:
+                    listErrores.append({"error": "004", "msg": "parametros insuficientes o excedidos"})
         elif programa[0] == 'reste':
             print("quinta")
+            if Ctrloperacion.buscarVariable(programa[1], index) is False:
+                listErrores.append([{"error": "002", "msg": "la variable indicada no existe", "lineal": index}])
+            if tamParametros(programa, index):
+                if len(programa) <= 2 or len(programa) >= 3:
+                    listErrores.append({"error": "004", "msg": "parametros insuficientes o excedidos"})
+
+            if Ctrloperacion.buscarVariableDato(programa[1], programa) != "I" or Ctrloperacion.buscarVariableDato(
+                    programa[1], programa) != "R":
+                listErrores.append({"error": "005", "msg": "El dato especificado no se puede resta"})
+
+        elif programa[0] == 'sume':
+            if Ctrloperacion.buscarVariable(programa[1], index) is False:
+                listErrores.append([{"error": "002", "msg": "la variable indicada no existe", "lineal": index}])
+            if tamParametros(programa, index):
+                if len(programa) <= 2 or len(programa) >= 3:
+                    listErrores.append({"error": "004", "msg": "parametros insuficientes o excedidos"})
+
+            if Ctrloperacion.buscarVariableDato(programa[1], programa) != "I" or Ctrloperacion.buscarVariableDato(
+                    programa[1], programa) != "R":
+                listErrores.append({"error": "005", "msg": "El dato especificado no se puede resta"})
+
+        elif programa[0] == 'divida':
+            print("octava", 'etiqueta', programa[1])
+            if Ctrloperacion.buscarVariable(programa[1], index) is False:
+                listErrores.append([{"error": "002", "msg": "la variable indicada no existe", "lineal": index}])
+            if tamParametros(programa, index):
+                if len(programa) <= 2 or len(programa) >= 3:
+                    listErrores.append({"error": "004", "msg": "parametros insuficientes o excedidos"})
+
+            if Ctrloperacion.buscarVariableDato(programa[1], programa) != "I" or Ctrloperacion.buscarVariableDato(
+                    programa[1], programa) != "R":
+                listErrores.append({"error": "005", "msg": "El dato especificado no se puede resta"})
 
         elif programa[0] == 'multiplique':
-            print("sexta")
-
-        elif programa[0] == 'vaya si':
-            print("septima")
-
-        elif programa[0] == 'etiqueta':
-            print("octava", 'etiqueta', programa[1])
-
-        elif programa[0] == 'muestre':
             print("novena")
+            if Ctrloperacion.buscarVariable(programa[1], index) is False:
+                listErrores.append([{"error": "002", "msg": "la variable indicada no existe", "lineal": index}])
+            if tamParametros(programa, index):
+                if len(programa) <= 2 or len(programa) >= 3:
+                    listErrores.append({"error": "004", "msg": "parametros insuficientes o excedidos"})
 
-        elif programa[0] == 'reste':
+            if Ctrloperacion.buscarVariableDato(programa[1], programa) != "I" or Ctrloperacion.buscarVariableDato(
+                    programa[1], programa) != "R":
+                listErrores.append({"error": "005", "msg": "El dato especificado no se puede resta"})
+
+        elif programa[0] == 'divida':
             print("quinta")
+            if Ctrloperacion.buscarVariable(programa[1], index) is False:
+                listErrores.append([{"error": "002", "msg": "la variable indicada no existe", "lineal": index}])
+            if tamParametros(programa, index):
+                if len(programa) <= 2 or len(programa) >= 3:
+                    listErrores.append({"error": "004", "msg": "parametros insuficientes o excedidos"})
 
-        elif programa[0] == 'reste':
+            if Ctrloperacion.buscarVariableDato(programa[1], programa) != "I" or Ctrloperacion.buscarVariableDato(
+                    programa[1], programa) != "R":
+                listErrores.append({"error": "005", "msg": "El dato especificado no se puede resta"})
+        elif programa[0] == 'potencia':
             print("quinta")
+            if Ctrloperacion.buscarVariable(programa[1], index) is False:
+                listErrores.append([{"error": "002", "msg": "la variable indicada no existe", "lineal": index}])
+            if tamParametros(programa, index):
+                if len(programa) <= 2 or len(programa) >= 3:
+                    listErrores.append({"error": "004", "msg": "parametros insuficientes o excedidos"})
 
-        elif programa[0] in 'O':
+            if Ctrloperacion.buscarVariableDato(programa[1], programa) != "I" or Ctrloperacion.buscarVariableDato(
+                    programa[1], programa) != "R":
+                listErrores.append({"error": "005", "msg": "El dato especificado no se puede resta"})
+
+        elif programa[0] in 'modulo':
+            print("operacion logica or")
+            if Ctrloperacion.buscarVariable(programa[1], index) is False:
+                listErrores.append([{"error": "002", "msg": "la variable indicada no existe", "lineal": index}])
+            if tamParametros(programa, index):
+                if len(programa) <= 2 or len(programa) >= 3:
+                    listErrores.append({"error": "004", "msg": "parametros insuficientes o excedidos"})
+
+            if Ctrloperacion.buscarVariableDato(programa[1], programa) != "I" or Ctrloperacion.buscarVariableDato(
+                    programa[1], programa) != "R":
+                listErrores.append({"error": "005", "msg": "El dato especificado no se puede resta"})
+
+        elif programa[0] in 'concatene':
             print("operacion logica or")
 
+        elif programa[0] in 'elimine':
+            print("operacion logica or")
+
+        elif programa[0] in 'extraiga':
+            print('operacion logica or')
+
         elif programa[0] == 'Y':
+            print("operacion logica and")
+
+        elif programa[0] == 'O':
             print("operacion logica and")
 
         elif programa[0] == 'NO':
@@ -136,12 +219,35 @@ def operacion(lista, index):
         elif programa[0] == 'muestre':
             print('muestre operacion')
 
+        elif programa[0] == 'imprima':
+            print('muestre operacion')
+
+        elif programa[0] == 'retorne':
+            print('muestre operacion')
+
+        elif programa[0] == 'vaya*':
+            print('muestre operacion')
+
+        elif programa[0] == 'vaya si':
+            print('muestre operacion')
+
+        elif programa[0] == 'etiqueta':
+            print('muestre operacion')
+
+        elif programa[0] == 'miOperacion':
+            print('mi operacion')
+
         cuenta += 1
 
 
 def buscarVariables(programa):
     for i in programa:
         pass
+
+
+def tamParametros(programa, linea):
+    if 2 < len(programa) or len(programa) > 4:
+        listErrores.append([{"error": "Minimo de parametros incorrectos", "lineal": linea}])
 
 
 def buscarEtiquetas(programa):
