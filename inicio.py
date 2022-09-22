@@ -9,6 +9,7 @@ Label(root, image=img).pack()
 from tkinter.filedialog import askopenfilenames
 import glob
 import controller.chmaquina as ctrl
+import controller.operaciones as op
 from pathlib import Path
 import controller.ejecucion as ejecucion
 from tkinter import *
@@ -25,6 +26,8 @@ root = Tk()
 memoriaInicial = IntVar()
 contador = 11
 numeroPrograma = 0
+diccionarioVariables = {}
+diccionarioEtiquetas = {}
 root.option_add("*Font", 'FiraCode 12 bold')
 wd = root.winfo_screenwidth()
 wh = root.winfo_screenheight()
@@ -80,7 +83,7 @@ labeK = Label(labelMemroia, text="Kernel", width=10)
 labeK.grid(row=1, column=0, pady=10)
 frameProceador.grid_propagate(False)
 # * Memoria
-spM = Spinbox(labelMemroia, from_=0, to=999, width=10, wrap=True,textvariable=textMemeroria)
+spM = Spinbox(labelMemroia, from_=0, to=999, width=10, wrap=True, textvariable=textMemeroria)
 spM.grid(row=0, column=1, padx=4)
 # * Kernel
 textFinal = IntVar()  # * SE USA PARA VALIDAR QUE NO SE CAMBIE EL KERNE CUANDO SE CARGE PROGRAMA
@@ -111,7 +114,7 @@ etiqueta2.place(x=5, y=65)
 pc = ttk.Entry(frameAcumulador, justify=CENTER, width=22, state="readonly")
 pc.place(x=40, y=65, anchor=NW)
 textPrograma = StringVar()
-programa = ttk.Entry(frameAcumulador, justify=CENTER, width=26, state="readonly",textvariable=textPrograma)
+programa = ttk.Entry(frameAcumulador, justify=CENTER, width=26, state="readonly", textvariable=textPrograma)
 style = ttk.Style()
 style.configure("Custom.TLabel", foreground="white",
                 background="#3baea0",
@@ -295,7 +298,9 @@ def select_file1():
 
     nueva = nueva.strip()
     nueva = nueva.split("\n")
+    ctrl.agregar_variables(nueva)
     areaDetrabajo()
+    ctrl.checkeoSintaxis(nueva)
     file.close()
 
 
