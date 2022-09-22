@@ -20,8 +20,6 @@ import controller.operaciones as Ctrloperacion
 cantidad = 0
 
 
-# TODO : VALIDAR QUE NOMBRE DE VARIABLE NO SE ACOMULADOR-acumulador
-
 def validarVariables(variable):
     if lenvariable(variable) and not (Ctrloperacion.palabrasReservadas(variable)):
         if not validarEspacios(variable):
@@ -127,7 +125,6 @@ def agregar_variables(instrucciones_archivo):
         e = " ".join(instruccion_interna.split())
         instrucciones = e.split(" ")
         llave = instrucciones[1]
-        print("llave", llave)
         # agregamos el valor por defecto de cada uno de los tipos de variables
         if instrucciones[0].lower() == "nueva":
             if len(instrucciones) == 3:

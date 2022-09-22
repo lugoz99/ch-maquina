@@ -15,3 +15,8 @@ def formatoIdentificacion():
 def tablaBloque(idso,programa, instrucciones, rb, rlc, rlp):
     for i in zip(idso,programa, instrucciones, rb, rlc, rlp):
         return i
+
+
+
+def ejecutar(intruccion):
+    pass

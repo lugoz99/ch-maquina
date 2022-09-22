@@ -8,6 +8,8 @@ Label(root, image=img).pack()
 # TODO esos espacios o buscar en que linea existen elementos en la linea
 from tkinter.filedialog import askopenfilenames
 import glob
+
+ACUMULADOR = 0
 import controller.chmaquina as ctrl
 import controller.operaciones as op
 from pathlib import Path
@@ -21,7 +23,8 @@ import os
 from tkinter import font
 
 nueva = ""
-
+kernel = 10
+diccionarioMemoeriaPrincipal = {}
 root = Tk()
 memoriaInicial = IntVar()
 contador = 11
@@ -56,6 +59,11 @@ menuBar.config(background="blue")
 
 def exitProg():
     root.quit()
+
+
+# ********************** GENERAR KERNEL **********************************************************
+def generarKernel():
+    pass
 
 
 # * --------------------AREA DEL PROCESADOR ------------------------------
@@ -227,32 +235,6 @@ tablaBloque.grid(row=3, column=0)
 tablaMemoria = ttk.Treeview(root, selectmode=BROWSE, height=35)
 
 
-def mostrarMapa():
-    vsb = ttk.Scrollbar(root, orient="vertical", command=tablaMemoria.yview)
-    vsb.place(x=1380, y=30, height=700)
-    memoriaInicial.set(ctrl.capacidadDefecto)
-    tablaMemoria['columns'] = 'contenido'
-    tablaMemoria.column("#0", width=120, anchor=CENTER)
-    tablaMemoria.column("contenido", width=180, anchor=CENTER)
-
-    tablaMemoria.heading("#0", text="Direcciona Memoria", anchor=CENTER, )
-    tablaMemoria.heading("contenido", text="Contenido", anchor=CENTER)
-    tablaMemoria.place(x=1100, y=20)
-    for i in range(0, 999):
-        var = f"{i:04d}"
-        if i == 0:
-            tablaMemoria.insert("", END, text="0000", values=[5])
-        if i >= 1 and i < 10:
-            print("se cumple")
-            tablaMemoria.insert("", END, text=var, values=["CHMAQUINA2022"])
-        if i >= 10:
-            print(var)
-            print("se cumple esta")
-            tablaMemoria.insert("", END, text=var, values=("sin contenido", ""))
-    # height=800
-    tablaMemoria.configure(yscrollcommand=vsb.set)
-
-
 def tamListaPrograma():
     return listaPrograma.size() > 0
 
@@ -299,9 +281,24 @@ def select_file1():
     nueva = nueva.strip()
     nueva = nueva.split("\n")
     ctrl.agregar_variables(nueva)
+    print(ctrl.listVariables.get('intermedia')['valor'])
     areaDetrabajo()
     ctrl.checkeoSintaxis(nueva)
     file.close()
+
+
+def mostrarMapa():
+    vsb = ttk.Scrollbar(root, orient="vertical", command=tablaMemoria.yview)
+    vsb.place(x=1380, y=30, height=700)
+    memoriaInicial.set(ctrl.capacidadDefecto)
+    tablaMemoria['columns'] = 'contenido'
+    tablaMemoria.column("#0", width=120, anchor=CENTER)
+    tablaMemoria.column("contenido", width=180, anchor=CENTER)
+
+    tablaMemoria.heading("#0", text="Direcciona Memoria", anchor=CENTER, )
+    tablaMemoria.heading("contenido", text="Contenido", anchor=CENTER)
+    tablaMemoria.place(x=1100, y=20)
+    tablaMemoria.configure(yscrollcommand=vsb.set)
 
 
 def areaDetrabajo():
@@ -403,8 +400,6 @@ def encontrarRetorno():
             return index + 1
 
 
-# ? COMO OBTENGO LAS POSICIONES DE LAS VARIABLES
-
 def asignarPosiciones(c):
     lista01 = []
     final = c  # 34 # 57
@@ -415,6 +410,15 @@ def asignarPosiciones(c):
 
     for d in zip(lista01, encontrarVariables()):
         listaVariables.insert(END, f" {d[0]:04d}   "   f"{numeroPrograma:04d}" + f"{d[1]}")
+
+
+def asignarPosicionesMe(c):
+    lista01 = []
+    final = c  # 34 # 57
+    inicial = c - variables(nueva)  # 34 - 4 = 30 57 - 4 =
+    while inicial < final:
+        lista01.append(inicial)
+        inicial += 1
 
 
 root.mainloop()
