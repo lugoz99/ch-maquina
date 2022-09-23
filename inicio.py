@@ -8,8 +8,11 @@ Label(root, image=img).pack()
 # TODO esos espacios o buscar en que linea existen elementos en la linea
 from tkinter.filedialog import askopenfilenames
 import glob
+import time
 
-ACUMULADOR = 0
+global ACUMULADOR
+programaPrincipal = {}
+posicionVariables = []
 import controller.chmaquina as ctrl
 import controller.operaciones as op
 from pathlib import Path
@@ -24,6 +27,7 @@ from tkinter import font
 
 nueva = ""
 kernel = 10
+lista01 = []
 diccionarioMemoeriaPrincipal = {}
 root = Tk()
 memoriaInicial = IntVar()
@@ -43,7 +47,7 @@ archivoMenu.add_command(label="Open", command=lambda: select_file1(), font=('Cas
 menuBar.add_cascade(label="file", menu=archivoMenu)
 
 ejecute = Menu(menuBar, tearoff=0)
-menuBar.add_cascade(label="Ejecute", menu=ejecute)
+menuBar.add_cascade(label="Ejecute", command=lambda: logicaChMaquina())
 
 muestre = Menu(menuBar, tearoff=0)
 menuBar.add_cascade(label="Muestre", command=lambda: mostrarMapa())
@@ -112,15 +116,18 @@ def cambios():
 frameAcumulador = Frame(root, width=250, height=95, borderwidth=2, border=2, relief=RIDGE)
 frameAcumulador.grid(row=0, column=1, sticky="ne")
 
+textAcumulador = IntVar()
 etiqueta1 = Label(frameAcumulador, text="Acumulador")
 etiqueta1.place(x=5, y=5)
-acumulador = ttk.Entry(frameAcumulador, justify=CENTER, width=15, state="readonly")
+acumulador = ttk.Entry(frameAcumulador, justify=CENTER, width=15, state="readonly", textvariable=textAcumulador)
 acumulador.place(x=104, y=5)
 
 etiqueta2 = Label(frameAcumulador, text="PC")
 etiqueta2.place(x=5, y=65)
-pc = ttk.Entry(frameAcumulador, justify=CENTER, width=22, state="readonly")
+ins = StringVar()
+pc = ttk.Entry(frameAcumulador, justify=CENTER, width=22, state="readonly", textvariable=ins)
 pc.place(x=40, y=65, anchor=NW)
+
 textPrograma = StringVar()
 programa = ttk.Entry(frameAcumulador, justify=CENTER, width=26, state="readonly", textvariable=textPrograma)
 style = ttk.Style()
@@ -177,11 +184,11 @@ labelT = Label(canvas, image=tkpic)
 labelT.grid(row=0, column=0)
 canvas.grid(row=0, column=0)
 canvas.grid_propagate(False)
+
 # *-------------------------------PANTALLA -----------------------------------------------
 listp = Listbox(canvas, width=25, height=6, activestyle='none', selectmode="browse")
 listp.place(in_=labelT, x=-3, relx=0.5, rely=0.4, y=4, anchor=CENTER)
-listp.insert(1, "1")
-listp.insert(2, "2")
+
 # *-------------------------------PANTALLA -----------------------------------------------
 
 framePCImpresora.grid_propagate(False)
@@ -280,14 +287,79 @@ def select_file1():
 
     nueva = nueva.strip()
     nueva = nueva.split("\n")
+
     ctrl.agregar_variables(nueva)
-    print(ctrl.listVariables.get('intermedia')['valor'])
     areaDetrabajo()
     ctrl.checkeoSintaxis(nueva)
     file.close()
 
 
+def logicaChMaquina():
+    global ACUMULADOR, e, result, instrucciones
+    e = ''
+    print((len(nueva)))
+    i = 0
+    while i < len(nueva):
+        print(nueva[i])
+        ins.set(nueva[i])
+        instrucciones = nueva[i].split(" ")
+        while "" in instrucciones:
+            instrucciones.remove("")
+        if instrucciones[0] == 'nueva':
+            i += 1
+        elif instrucciones[0] == 'cargue':
+            llave = instrucciones[1]
+            v = int(buscarVariable(instrucciones[1]))
+            ACUMULADOR = v
+            i += 1
+        elif instrucciones[0] == 'almacene':
+            llave = instrucciones[1]
+            ctrl.listVariables[llave]['valor'] = ACUMULADOR
+            i += 1
+
+        elif instrucciones[0] == 'reste':
+            v = int(buscarVariable(instrucciones[1]))
+            ACUMULADOR = ACUMULADOR - v
+            i += 1
+
+        elif instrucciones[0] == 'multiplique':
+            v = int(buscarVariable(instrucciones[1]))
+            ACUMULADOR = ACUMULADOR * v
+            i += 1
+
+        elif instrucciones[0] == 'muestre':
+            i += 1
+            v = int(buscarVariable(instrucciones[1]))
+            print(v,type(v))
+            listp.insert(1, v)
+
+
+        elif instrucciones[0] == 'vayasi':
+            if ACUMULADOR > 0:
+                print(ACUMULADOR, "> 0")
+                i = int(asignarPosicionEtiquetas(contador)[0]) - 1
+            elif ACUMULADOR < 0:
+                print(ACUMULADOR, "< 0")
+                i = int(asignarPosicionEtiquetas(contador)[1]) - 1
+            else:
+                i += 1
+
+        elif instrucciones[0] == 'etiqueta':
+            i += 1
+
+        elif instrucciones[0] == 'retorne':
+            i += 1
+        else:
+            print("ENTRAMOS A ULTIMO ELSE")
+            i += 1
+
+        instrucciones.clear()
+
+
+# * Mapa que muestra la memeria principal del programa
+# ! Faltan validaciones importantes
 def mostrarMapa():
+    global contador, ACUMULADOR
     vsb = ttk.Scrollbar(root, orient="vertical", command=tablaMemoria.yview)
     vsb.place(x=1380, y=30, height=700)
     memoriaInicial.set(ctrl.capacidadDefecto)
@@ -299,6 +371,31 @@ def mostrarMapa():
     tablaMemoria.heading("contenido", text="Contenido", anchor=CENTER)
     tablaMemoria.place(x=1100, y=20)
     tablaMemoria.configure(yscrollcommand=vsb.set)
+    var = variables(nueva)
+    d = ([i.split(",") for i in nueva])
+    tablaMemoria.insert("", index=0, text="0000", values=["ACUMULADOR"])
+    for j in range(1, 11):
+        tablaMemoria.insert("", index=j, text=f"{j:04d}", values=["ch-maquina-2022"])
+    for i, index in enumerate(d):
+        tablaMemoria.insert("", index=11 + i, text=f"{i + 11:04d}", values=tuple(index))
+    for m in range(len(listaDatosVariables())):
+        tablaMemoria.insert("", index=contador - var + m, text=f"{contador - var + m:04d}",
+                            values=tuple(listaDatosVariables()[m]))
+    contador += encontrarRetorno() + var
+
+
+def listaDatosVariables():
+    lista = []
+    for i in ctrl.listVariables:
+        val = (ctrl.listVariables[i]['valor'])
+        lista.append(val)
+    return lista
+
+
+def buscarVariable(variable):
+    for i in ctrl.listVariables:
+        if variable in ctrl.listVariables.keys():
+            return ctrl.listVariables[variable]['valor']
 
 
 def areaDetrabajo():
@@ -352,6 +449,17 @@ def encontrarVariables():
     for index, i in enumerate(nueva):
         global programa
         # * e quita espacios
+        e = " ".join(i.split())
+        programa = e.split(" ")
+        if programa[0].lower() == 'nueva':
+            v.append((programa[1]))
+    return v
+
+
+def getlistaVariables():
+    v = []
+    for index, i in enumerate(nueva):
+        global programa
         e = " ".join(i.split())
         programa = e.split(" ")
         if programa[0].lower() == 'nueva':
@@ -413,12 +521,15 @@ def asignarPosiciones(c):
 
 
 def asignarPosicionesMe(c):
+    global lista01, posicionVariables
     lista01 = []
     final = c  # 34 # 57
     inicial = c - variables(nueva)  # 34 - 4 = 30 57 - 4 =
     while inicial < final:
         lista01.append(inicial)
+        posicionVariables.append(inicial)
         inicial += 1
+    return lista01
 
 
 root.mainloop()

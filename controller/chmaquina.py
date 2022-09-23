@@ -1,4 +1,5 @@
 listErrores = []
+listaProgramaMemoriaPrincipal = {}
 # * Ultimo digito de la cedula
 z = 0
 # * La capacidad por defecto se asume que es de z * 0 + 50 pos
@@ -139,6 +140,10 @@ def agregar_variables(instrucciones_archivo):
             listVariables[llave] = {'tipo': instrucciones[2], 'valor': instrucciones[3]}
 
 
+
+def ejecucionxacumulador():
+    pass
+
 def valExisteVariable(opr):
     if opr[1] not in listVariables:
         listErrores.append("Error, la variable " + opr[1] + " no ha sido asignada")
@@ -180,3 +185,27 @@ def tamParametrosEtiqueta(programa, linea):
 
 def mostrarErroes() -> list:
     return listErrores
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

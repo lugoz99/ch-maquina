@@ -68,3 +68,6 @@ def verificarVariables(variable, listaErr, tipoDatos):
 
 
 
+
+
+
