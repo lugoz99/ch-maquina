@@ -23,6 +23,7 @@ from tkinter import filedialog as fd
 from tkinter.messagebox import showinfo
 from tkinter import ttk
 import os
+from tkinter import messagebox
 from tkinter import font
 
 nueva = ""
@@ -204,17 +205,18 @@ imprimir.place(x=45, y=280)
 labelTop = Label(framePCImpresora, text="Modo", width=6)
 labelTop.place(x=45, y=240)
 
-comboExample = ttk.Combobox(framePCImpresora,
+combo = StringVar()
+combo.set("Kernel")
+comboExample = ttk.Combobox(framePCImpresora, textvariable=combo,
                             values=[
                                 "User",
                                 "Kernel"], state="read", width=10)
 comboExample.place(x=120, y=240)
+comboExample.configure(state="readonly")
 # *-------------------------------TEXTO IMPRESORA--------------------------
-printerText = Text(framePCImpresora, width=20, height=20)
+printerText = Listbox(framePCImpresora, width=20, height=18)
 printerText.place(y=450, x=100)
-printerText.insert('1.0', 'This is a Text widget demo')
 
-printerText.configure(state="disabled")
 # ***************************************************************************
 # *------------------------------BLOQUE DE PROGRAMAS ------------
 
@@ -263,63 +265,90 @@ def select_file1():
     global numeroprograma
     global contador
     global filename
-    filetypes = (
-        ('text files', '*.ch'),
-        ("all files", "*.*")
-    )
-    numeroprograma = 0
-    filename = fd.askopenfilename(
-        title='Open a file',
-        initialdir='/ch-maquina',
-        filetypes=filetypes,
-    )
-    numeroprograma += 1
-    # crearBloquetabla(filename)
-    file = open(filename, "r")
-    lineas = file.readlines()
-    # * Establesco el nombre del programa
-    # ? Que debe pasar cuando se abren varios programas
-    textPrograma.set(os.path.basename(filename))
-    nueva = ""
-    for ln in range(len(lineas)):
-        if not lineas[ln].startswith("//"):
-            nueva += lineas[ln]
+    try:
+        filetypes = (
+            ('text files', '*.ch'),
+            ("all files", "*.*")
+        )
+        numeroprograma = 0
+        filename = fd.askopenfilename(
+            title='Open a file',
+            initialdir='/ch-maquina',
+            filetypes=filetypes,
+        )
+        numeroprograma += 1
+        # crearBloquetabla(filename)
+        file = open(filename, "r")
+        lineas = file.readlines()
+        # * Establesco el nombre del programa
+        # ? Que debe pasar cuando se abren varios programas
+        textPrograma.set(os.path.basename(filename))
+        nueva = ""
+        for ln in range(len(lineas)):
+            if not lineas[ln].startswith("//"):
+                nueva += lineas[ln]
 
-    nueva = nueva.strip()
-    nueva = nueva.split("\n")
+        nueva = nueva.strip()
+        nueva = nueva.split("\n")
 
-    ctrl.agregar_variables(nueva)
-    areaDetrabajo()
-    ctrl.checkeoSintaxis(nueva)
-    file.close()
+        ctrl.agregar_variables(nueva)
+        ctrl.checkeoSintaxis(nueva)
+        print(ctrl.listErrores)
+        areaDetrabajo()
+        if len(ctrl.listErrores) == 0:
+            messagebox.showinfo("Compilacion", "Programa sin errores listo para ser cargado")
+        else:
+            messagebox.showerror("Compilacion", "Programa Contiene errores")
+        file.close()
+    except:
+        messagebox.showerror("Error de sintaxis", "Programa contiene errores")
 
 
 def logicaChMaquina():
     global ACUMULADOR, e, result, instrucciones
     e = ''
-    print((len(nueva)))
     i = 0
+    combo.set("User")
     while i < len(nueva):
-        print(nueva[i])
-        ins.set(nueva[i])
         instrucciones = nueva[i].split(" ")
         while "" in instrucciones:
             instrucciones.remove("")
+        print(f"linela {i} -> instruccion {instrucciones}")
         if instrucciones[0] == 'nueva':
             i += 1
+
+
         elif instrucciones[0] == 'cargue':
             llave = instrucciones[1]
+            print(ctrl.listVariables.get(llave), "Tipo->", type(ctrl.listVariables.get(llave)['valor']))
             v = int(buscarVariable(instrucciones[1]))
+            print("cargue variable en acumulaodr ", v)
             ACUMULADOR = v
+            print("LE CARGO AL ACUMULADOR ", ACUMULADOR)
             i += 1
+
+
         elif instrucciones[0] == 'almacene':
             llave = instrucciones[1]
+            print("llave", llave)
             ctrl.listVariables[llave]['valor'] = ACUMULADOR
+            print(ctrl.listVariables[llave]['valor'])
+            print(llave, f"->ALMACENE EN POS VARIABLE LO QUE HAY EN ACUMULADOR {ACUMULADOR} ",
+                  ctrl.listVariables[llave]['valor'])
+
+            print("Lista de variables", ctrl.listVariables)
             i += 1
 
         elif instrucciones[0] == 'reste':
             v = int(buscarVariable(instrucciones[1]))
             ACUMULADOR = ACUMULADOR - v
+            print("RESTE->", ACUMULADOR)
+            i += 1
+
+        elif instrucciones[0] == 'sume':
+            v = int(buscarVariable(instrucciones[1]))
+            ACUMULADOR = ACUMULADOR + v
+            print("AHORA SUME AC->", ACUMULADOR)
             i += 1
 
         elif instrucciones[0] == 'multiplique':
@@ -328,32 +357,44 @@ def logicaChMaquina():
             i += 1
 
         elif instrucciones[0] == 'muestre':
-            i += 1
-            v = int(buscarVariable(instrucciones[1]))
-            print(v,type(v))
+            v = buscarVariable(instrucciones[1])
+            print("Salida por consola", v)
             listp.insert(1, v)
+            i += 1
+
+
+        elif instrucciones[0] == 'imprima':
+            v = buscarVariable(instrucciones[1])
+            print("Imprima Resultado", v)
+            printerText.insert(1, f"{v}")
+            i += 1
+            ins.set(nueva[i])
 
 
         elif instrucciones[0] == 'vayasi':
             if ACUMULADOR > 0:
                 print(ACUMULADOR, "> 0")
                 i = int(asignarPosicionEtiquetas(contador)[0]) - 1
+                print("i de 1", i)
             elif ACUMULADOR < 0:
                 print(ACUMULADOR, "< 0")
                 i = int(asignarPosicionEtiquetas(contador)[1]) - 1
+                print("i de 2", i)
             else:
                 i += 1
+                ins.set(nueva[i])
 
         elif instrucciones[0] == 'etiqueta':
             i += 1
 
         elif instrucciones[0] == 'retorne':
             i += 1
+
         else:
             print("ENTRAMOS A ULTIMO ELSE")
             i += 1
 
-        instrucciones.clear()
+        #instrucciones.clear()
 
 
 # * Mapa que muestra la memeria principal del programa
@@ -379,8 +420,9 @@ def mostrarMapa():
     for i, index in enumerate(d):
         tablaMemoria.insert("", index=11 + i, text=f"{i + 11:04d}", values=tuple(index))
     for m in range(len(listaDatosVariables())):
+        print(listaDatosVariables()[m])
         tablaMemoria.insert("", index=contador - var + m, text=f"{contador - var + m:04d}",
-                            values=tuple(listaDatosVariables()[m]))
+                            values=listaDatosVariables()[m])
     contador += encontrarRetorno() + var
 
 

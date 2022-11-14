@@ -1,11 +1,11 @@
 nueva unidad I 1
-nueva m I 5
-nueva  n I 9
-nueva  respuesta I 0
+nueva m I 78 
+nueva n I 54
+nueva respuesta I 0
 nueva resultado C Resultado=
-nueva  intermedia I
+nueva intermedia I 0
 cargue n 
-reste   unidad
+reste unidad
 almacene intermedia
 cargue respuesta
 sume m

@@ -53,7 +53,9 @@ def checkeoSintaxis(lista):
         # * e quita espacios
         e = " ".join(i.split())
         programa = e.split(" ")
+        print("sintaxis-> ", len(programa), " -> tamaño", tamParametros2(programa, index), "instrucciones->", programa)
         if programa[0] == 'nueva':
+            print("len de variable", len(programa))
             tamParametrosVariables(programa, index)
             Ctrloperacion.verificarVariables(programa, listErrores, tiposAceptados)
             if validarVariables(programa[1]) is False or validarVariables(programa[1]) is None:
@@ -99,10 +101,8 @@ def checkeoSintaxis(lista):
             funcion_error_y_o_no(programa)
         elif programa[0] == 'O':
             funcion_error_y_o_no(programa)
-            pass
         elif programa[0] == 'NO':
             funcion_error_y_o_no(programa)
-            pass
         elif programa[0] == 'muestre':
             tamParametros2(programa, index)
 
@@ -123,26 +123,29 @@ def checkeoSintaxis(lista):
 
 def agregar_variables(instrucciones_archivo):
     for instruccion_interna in instrucciones_archivo:
-        e = " ".join(instruccion_interna.split())
+
+        e = " ".join(instruccion_interna.split()).strip()
+        e = e.strip(" ")
         instrucciones = e.split(" ")
         llave = instrucciones[1]
+        llave = llave.strip()
         # agregamos el valor por defecto de cada uno de los tipos de variables
         if instrucciones[0].lower() == "nueva":
             if len(instrucciones) == 3:
                 if instrucciones[2] == "I":
-                    instrucciones.append("0")
+                    instrucciones.append(f"{int(0)}")
                 elif instrucciones[2] == "L":
-                    instrucciones.append("0")
+                    instrucciones.append(f"{int(0)}")
                 elif instrucciones[2] == "R":
-                    instrucciones.append("0")
+                    instrucciones.append(f"{float(0)}")
                 elif instrucciones[2] == "C":
                     instrucciones.append(" ")
             listVariables[llave] = {'tipo': instrucciones[2], 'valor': instrucciones[3]}
 
 
-
 def ejecucionxacumulador():
     pass
+
 
 def valExisteVariable(opr):
     if opr[1] not in listVariables:
@@ -166,12 +169,14 @@ def funcion_error_y_o_no(palabra):
 
 
 def tamParametrosVariables(programa, linea):
-    if 2 < len(programa) or len(programa) > 4:
-        listErrores.append([{"error": "Error de sintaxis parametros mas o menos de los requeridos", "linea": linea}])
+    print(len(programa))
+    if len(programa) < 2 or len(programa) > 4:
+        listErrores.append(
+            [{"error Variable": "Error de sintaxis parametros mas o menos de los requeridos", "linea": linea}])
 
 
 def tamParametros2(programa, linea):
-    if len(programa) < 2 or len(programa) > 2:
+    if len(programa) < 2:
         listErrores.append(
             [{"operacion": programa[0], "msg": "Error de sintaxis parametros mas o menos de dos", "linea": linea}])
 
@@ -185,27 +190,3 @@ def tamParametrosEtiqueta(programa, linea):
 
 def mostrarErroes() -> list:
     return listErrores
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

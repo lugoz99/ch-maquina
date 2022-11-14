@@ -1,19 +1,21 @@
-nueva unidad I 1
-nueva m I 5
-nueva respuesta I 1
+nuevas unidad I 1
+nueva m I 1hola
+nueva respuesta I 15 
 nueva intermedia I 0
-cargue m
+cargue una_variable
+nueva variable L 110
 almacene respuesta
-reste unidad
+reste var1
 almacene intermedia
 cargue respuesta
 multiplique intermedia
 almacene respuesta
 cargue intermedia
-reste unidad
+reste nueva
 etiqueta itere 8
 etiqueta fin 19
 vayasi itere fin
-muestre respuesta
 imprima respuesta
+/hola
+//esto si es un comentario
 retorne 0

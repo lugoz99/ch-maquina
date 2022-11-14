@@ -1,21 +1,22 @@
 nueva unidad I 1
- nueva m I 2 
-nueva  n I 3
-nueva  respuesta I 0
+nueva m I 5 
+nueva n I 9
+nueva respuesta I 0
 nueva resultado C Resultado=
-nueva  intermedia I
+nueva intermedia I
 cargue n 
-reste   unidad
+reste unidad
 almacene intermedia
 cargue respuesta
 sume m
 almacene respuesta
 cargue intermedia
-vayasi   iterex iterex
-etiqueta iterex 8 
-//cargue m
+vayasi itere fin
+etiqueta itere 8 
+etiqueta fin 22
+etiqueta principio 1
 muestre resultado 
 muestre respuesta
-imprima acumulador
+imprima resultado
 imprima respuesta
-retorne 000 
+retorne 0
